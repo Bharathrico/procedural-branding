@@ -26,14 +26,32 @@ npm run preview  # preview production build
 npm run lint     # lint with oxlint
 ```
 
+The dev server runs on **https** (`https://localhost:5173`) via
+`vite-plugin-mkcert`, which generates a locally-trusted certificate on first run.
+
 ## Structure
 
 ```
 src/
-  main.jsx    # React entry
-  App.jsx     # Canvas + scene root
-  index.css   # global styles (full-bleed canvas)
+  main.jsx                    # React entry
+  App.jsx                     # App state (shapes, tool, fill) + DOM toolbar
+  components/DrawCanvas.jsx   # 2D canvas: drag to draw filled shapes (active screen)
+  components/ShapeScene.jsx   # R3F canvas: draw on a plane, beveled extrusions (currently unused)
+  lib/shapes.js               # Pure helpers: drag -> shape, shape measurements
+  index.css                   # global styles (full-bleed canvas, toolbar, swatches)
 ```
+
+Interaction: left-drag on the 2D canvas draws a square, rectangle or circle.
+The Select tool (V) picks a shape; drag its handles to resize (squares and
+circles stay uniform) or its body to move. Fill edits apply to the next shape
+and to the selected one.
+
+Data model: every shape is a box `{ id, type, x, y, w, h, fill }` in screen
+pixels (circles use `w` as diameter). `fill` is
+`{ type: 'solid' | 'linear' | 'radial', color, from, to, angle }`; gradients
+are laid out relative to the shape's box. Undo history lives in the same state
+object as the shapes (`App.jsx`). `ShapeScene.jsx` (3D extrusion, world units)
+is kept for later but not mounted.
 
 As the project grows, prefer:
 - `src/scenes/` — top-level scenes
